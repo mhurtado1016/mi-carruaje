@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RouteTrack — Pantallas Parte 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080B11;
+    --surface: #0F1520;
+    --surface2: #161E2E;
+    --border: #1C2A40;
+    --accent: #00E5A0;
+    --accent2: #0080FF;
+    --warn: #FF6B35;
+    --danger: #FF3B5C;
+    --text: #E8EDF5;
+    --muted: #5A6880;
+    --green: #00C87A;
+    --purple: #9B6DFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    font-family: 'Syne', sans-serif;
+    color: var(--text);
+    padding: 40px;
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 700px 400px at 10% 30%, rgba(0,229,160,0.035) 0%, transparent 70%),
+      radial-gradient(ellipse 500px 500px at 90% 70%, rgba(0,128,255,0.035) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+  .wrapper { position: relative; z-index: 1; }
+
+  h2 {
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .flow-label { font-size: 11px; font-family: 'Space Mono', monospace; color: var(--accent); letter-spacing: 1px; margin-bottom: 6px; }
+  .screen-name { font-size: 11px; font-family: 'Space Mono', monospace; color: var(--muted); text-align: center; margin-bottom: 10px; }
+  .screen-name span { color: var(--text); }
+
+  .screens-row {
+    display: flex; gap: 20px; margin-bottom: 54px;
+    align-items: flex-start; flex-wrap: nowrap;
+    overflow-x: auto; padding-bottom: 10px;
+  }
+  .screen-wrap { flex-shrink: 0; }
+  .arrow { font-size: 22px; color: var(--border); margin-top: 130px; flex-shrink: 0; align-self: flex-start; }
+
+  /* PHONE */
+  .phone {
+    width: 262px; min-height: 520px;
+    background: var(--surface);
+    border-radius: 36px;
+    border: 2px solid var(--border);
+    overflow: hidden; position: relative;
+    box-shadow: 0 28px 56px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03);
+  }
+  .phone-notch {
+    position: absolute; top: 10px; left: 50%;
+    transform: translateX(-50%);
+    width: 78px; height: 22px;
+    background: #040710; border-radius: 14px; z-index: 10;
+  }
+  .status-bar {
+    height: 44px; padding: 0 20px;
+    display: flex; align-items: flex-end; padding-bottom: 6px;
+    justify-content: space-between;
+    font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted);
+  }
+  .inner { padding: 0 16px 16px; }
+
+  /* ── shared atoms ── */
+  .sec-label {
+    font-size: 10px; font-family: 'Space Mono', monospace;
+    color: var(--muted); letter-spacing: 1px;
+    text-transform: uppercase; margin-bottom: 10px;
+  }
+  .back-header { display: flex; align-items: center; gap: 8px; padding: 10px 0 14px; }
+  .back-btn { font-size: 17px; }
+  .back-title { font-size: 16px; font-weight: 800; }
+  .nav-bar {
+    display: flex; border-top: 1px solid var(--border);
+    padding: 8px 0 4px; margin-top: auto;
+  }
+  .nav-i { flex: 1; text-align: center; font-size: 9px; color: var(--muted); font-family: 'Space Mono', monospace; }
+  .nav-i.on { color: var(--accent); }
+  .ni { font-size: 18px; display: block; }
+  .pill {
+    font-size: 9px; font-family: 'Space Mono', monospace;
+    padding: 3px 8px; border-radius: 10px; font-weight: 700;
+  }
+  .pill-on   { background: rgba(0,229,160,0.12); color: var(--accent); }
+  .pill-off  { background: rgba(90,104,128,0.15); color: var(--muted); }
+  .pill-ok   { background: rgba(0,200,122,0.12);  color: var(--green); }
+  .pill-warn { background: rgba(255,107,53,0.12); color: var(--warn); }
+  .pill-blue { background: rgba(0,128,255,0.12);  color: var(--accent2); }
+  .pill-pur  { background: rgba(155,109,255,0.12); color: var(--purple); }
+
+  .btn-primary { background: var(--accent); color: #000; border-radius: 14px; padding: 14px; text-align: center; font-weight: 800; font-size: 14px; }
+  .btn-ghost   { background: transparent; border: 1px solid var(--border); border-radius: 13px; padding: 11px; text-align: center; font-size: 12px; color: var(--muted); font-family: 'Space Mono', monospace; }
+  .btn-danger  { background: rgba(255,59,92,0.1); border: 1px solid rgba(255,59,92,0.25); border-radius: 13px; padding: 12px; text-align: center; font-size: 13px; font-weight: 700; color: var(--danger); }
+
+  /* card */
+  .card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px; margin-bottom: 10px;
+  }
+
+  /* ══════════════════════════════════════
+     SCREEN: PERFIL DEL CONDUCTOR
+  ══════════════════════════════════════ */
+  .profile-hero {
+    background: linear-gradient(135deg, rgba(0,229,160,0.08), rgba(0,128,255,0.08));
+    border: 1px solid rgba(0,229,160,0.15);
+    border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 14px;
+  }
+  .profile-avatar {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border-radius: 50%; margin: 0 auto 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 800;
+    border: 3px solid var(--accent);
+  }
+  .profile-name { font-size: 17px; font-weight: 800; }
+  .profile-id   { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 3px; }
+  .profile-tags { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
+
+  .kpi-row { display: flex; gap: 6px; margin-bottom: 12px; }
+  .kpi-box {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px 8px; text-align: center;
+  }
+  .kpi-v { font-size: 18px; font-weight: 800; font-family: 'Space Mono', monospace; color: var(--accent); letter-spacing: -1px; }
+  .kpi-l { font-size: 9px; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 2px; }
+
+  .menu-item {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 14px; margin-bottom: 7px;
+  }
+  .mi-icon { font-size: 18px; width: 30px; text-align: center; }
+  .mi-text { flex: 1; font-size: 13px; font-weight: 600; }
+  .mi-arrow { color: var(--muted); font-size: 13px; }
+
+  /* ══════════════════════════════════════
+     SCREEN: NOTIFICACIONES
+  ══════════════════════════════════════ */
+  .notif-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 13px; padding: 12px; margin-bottom: 8px;
+    position: relative;
+  }
+  .notif-item.unread { border-color: rgba(0,229,160,0.2); }
+  .notif-item.unread::before { content: ''; position: absolute; top: 14px; right: 14px; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; }
+  .notif-icon { font-size: 22px; flex-shrink: 0; }
+  .notif-title { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+  .notif-body  { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; line-height: 1.5; }
+  .notif-time  { font-size: 9px; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 5px; }
+
+  /* ══════════════════════════════════════
+     SCREEN: MAPA EXPANDIDO
+  ══════════════════════════════════════ */
+  .map-full {
+    background: #080F1E; border-radius: 0;
+    margin: 0 -16px; height: 340px;
+    position: relative; overflow: hidden;
+  }
+  .mf-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,128,255,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,128,255,0.07) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .mf-road  { position: absolute; background: rgba(0,128,255,0.3); height: 8px; width: 200%; top: 55%; left: -50%; transform: rotate(-5deg); border-radius: 4px; }
+  .mf-road2 { position: absolute; background: rgba(0,229,160,0.18); height: 5px; width: 200%; top: 38%; left: -50%; transform: rotate(8deg); border-radius: 4px; }
+  .mf-road3 { position: absolute; background: rgba(0,128,255,0.15); height: 4px; width: 200%; top: 72%; left: -50%; transform: rotate(-12deg); border-radius: 4px; }
+  .mf-dot   { position: absolute; width: 20px; height: 20px; background: var(--accent); border-radius: 50%; border: 3px solid white; top: 52%; left: 45%; transform: translate(-50%,-50%); box-shadow: 0 0 24px var(--accent); animation: mp 2s ease-in-out infinite; }
+  @keyframes mp { 0%,100%{box-shadow:0 0 24px rgba(0,229,160,0.9)} 50%{box-shadow:0 0 48px rgba(0,229,160,0.2)} }
+  .mf-pulse { position: absolute; width: 50px; height: 50px; border: 2px solid rgba(0,229,160,0.3); border-radius: 50%; top: 52%; left: 45%; transform: translate(-50%,-50%); animation: ring 2.5s ease-out infinite; }
+  @keyframes ring { 0%{opacity:1;transform:translate(-50%,-50%) scale(0.5)} 100%{opacity:0;transform:translate(-50%,-50%) scale(2)} }
+  .mf-stop  { position: absolute; width: 13px; height: 13px; border-radius: 50%; border: 2px solid white; }
+  .mf-stop.s1 { background: var(--warn); top: 30%; left: 68%; }
+  .mf-stop.s2 { background: var(--accent2); top: 60%; left: 72%; }
+  .mf-stop.s3 { background: var(--purple); top: 70%; left: 30%; }
+  .mf-path  { position: absolute; top: 51%; left: 46%; width: 100px; height: 2px; background: linear-gradient(90deg, var(--accent), var(--warn)); transform-origin: left; transform: rotate(-20deg); opacity: 0.7; border-radius: 2px; }
+  .mf-label { position: absolute; background: rgba(6,12,24,0.85); border: 1px solid var(--border); padding: 4px 9px; border-radius: 8px; font-size: 9px; font-family: 'Space Mono', monospace; }
+  .mf-controls {
+    position: absolute; right: 12px; top: 12px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .mf-btn { background: rgba(6,12,24,0.85); border: 1px solid var(--border); border-radius: 8px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .map-bottom {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(8,15,30,0.95));
+    padding: 20px 16px 12px;
+  }
+
+  /* ══════════════════════════════════════
+     SCREEN: AJUSTES GPS
+  ══════════════════════════════════════ */
+  .settings-section { margin-bottom: 16px; }
+  .settings-group-label { font-size: 10px; font-family: 'Space Mono', monospace; color: var(--muted); letter-spacing: 1px; margin-bottom: 8px; }
+  .settings-item {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 12px 14px; margin-bottom: 1px;
+  }
+  .settings-item:first-of-type { border-radius: 12px 12px 0 0; }
+  .settings-item:last-of-type  { border-radius: 0 0 12px 12px; }
+  .settings-item:only-of-type  { border-radius: 12px; }
+  .si-icon { font-size: 17px; width: 26px; text-align: center; }
+  .si-text  { flex: 1; }
+  .si-title { font-size: 12px; font-weight: 700; }
+  .si-sub   { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 1px; }
+  /* toggle */
+  .toggle { width: 38px; height: 22px; background: var(--accent); border-radius: 11px; position: relative; flex-shrink: 0; }
+  .toggle::after { content: ''; position: absolute; width: 16px; height: 16px; background: white; border-radius: 50%; top: 3px; right: 3px; }
+  .toggle.off { background: var(--border); }
+  .toggle.off::after { right: auto; left: 3px; }
+  /* select chip */
+  .si-select { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 4px 10px; font-size: 10px; font-family: 'Space Mono', monospace; color: var(--accent); }
+
+  /* ══════════════════════════════════════
+     SCREEN: OFFLINE / SIN CONEXIÓN
+  ══════════════════════════════════════ */
+  .offline-banner {
+    background: rgba(255,107,53,0.08); border: 1px solid rgba(255,107,53,0.25);
+    border-radius: 12px; padding: 10px 14px;
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 14px;
+  }
+  .ob-dot { width: 8px; height: 8px; background: var(--warn); border-radius: 50%; flex-shrink: 0; animation: bl 1.5s ease-in-out infinite; }
+  @keyframes bl { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .ob-text { font-size: 11px; font-family: 'Space Mono', monospace; color: var(--warn); }
+
+  .offline-queue {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px; margin-bottom: 12px;
+  }
+  .oq-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .oq-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+  .oq-label { font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; }
+  .oq-val { font-size: 11px; font-weight: 700; font-family: 'Space Mono', monospace; }
+  .oq-val.warn { color: var(--warn); }
+
+  .sync-item { display: flex; gap: 10px; align-items: center; background: var(--surface2); border: 1px solid var(--border); border-radius: 11px; padding: 10px 12px; margin-bottom: 6px; }
+  .sync-i-icon { font-size: 16px; }
+  .sync-i-text { flex: 1; font-size: 11px; font-family: 'Space Mono', monospace; color: var(--muted); }
+  .sync-i-val  { font-size: 11px; font-weight: 700; font-family: 'Space Mono', monospace; color: var(--warn); }
+
+  /* ══════════════════════════════════════
+     SCREEN: STATS / DESEMPEÑO
+  ══════════════════════════════════════ */
+  .period-tabs { display: flex; gap: 4px; margin-bottom: 14px; }
+  .ptab {
+    flex: 1; text-align: center; padding: 8px 6px;
+    border-radius: 10px; font-size: 10px; font-family: 'Space Mono', monospace;
+    background: var(--surface2); border: 1px solid var(--border); color: var(--muted);
+  }
+  .ptab.on { background: rgba(0,229,160,0.1); border-color: rgba(0,229,160,0.3); color: var(--accent); }
+
+  .big-stat { text-align: center; margin-bottom: 16px; }
+  .bs-val  { font-size: 44px; font-weight: 800; font-family: 'Space Mono', monospace; letter-spacing: -2px; color: var(--accent); line-height: 1; }
+  .bs-unit { font-size: 18px; color: var(--muted); }
+  .bs-lab  { font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 4px; }
+
+  /* bar chart */
+  .bar-chart { margin-bottom: 14px; }
+  .bars-wrap { display: flex; gap: 5px; align-items: flex-end; height: 80px; }
+  .bar-col   { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bar       { width: 100%; border-radius: 4px 4px 0 0; background: rgba(0,229,160,0.2); transition: height 0.3s; }
+  .bar.hi    { background: var(--accent); }
+  .bar-lbl   { font-size: 9px; color: var(--muted); font-family: 'Space Mono', monospace; }
+
+  .stat-row2 { display: flex; gap: 6px; margin-bottom: 10px; }
+  .sr-box { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 10px; text-align: center; }
+  .sr-v { font-size: 17px; font-weight: 800; font-family: 'Space Mono', monospace; }
+  .sr-l { font-size: 9px; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 3px; }
+
+  .perf-item { display: flex; align-items: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 11px; padding: 10px 12px; margin-bottom: 6px; }
+  .pi-icon   { font-size: 18px; }
+  .pi-text   { flex: 1; }
+  .pi-title  { font-size: 12px; font-weight: 700; }
+  .pi-sub    { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; }
+  .pi-bar-wrap { width: 60px; }
+  .pi-bar    { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .pi-fill   { height: 100%; background: var(--accent); border-radius: 3px; }
+  .pi-pct    { font-size: 9px; color: var(--accent); font-family: 'Space Mono', monospace; text-align: right; margin-top: 2px; }
+
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<!-- ══════ FLUJO 3: PERFIL + NOTIFICACIONES ══════ -->
+<h2>Flujo 03 — Perfil del conductor y notificaciones</h2>
+<div class="screens-row">
+
+  <!-- PERFIL -->
+  <div class="screen-wrap">
+    <div class="flow-label">08 · Perfil</div>
+    <div class="screen-name"><span>Datos del conductor</span></div>
+    <div class="phone" style="min-height:580px;">
+      <div class="phone-notch"></div>
+      <div class="status-bar"><span>15:10</span><span>🔋</span></div>
+      <div class="inner">
+        <div class="back-header">
+          <div class="back-btn">←</div>
+          <div class="back-title">Mi perfil</div>
+        </div>
+        <div class="profile-hero">
+          <div class="profile-avatar">CM</div>
+          <div class="profile-name">Carlos Martínez</div>
+          <div class="profile-id">ID: EMP-00482 · Zona Norte</div>
+          <div class="profile-tags">
+            <div class="pill pill-ok">● Activo</div>
+            <div class="pill pill-blue">Turno día</div>
+          </div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-box">
+            <div class="kpi-v">198</div>
+            <div class="kpi-l">km esta semana</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-v">12</div>
+            <div class="kpi-l">viajes</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-v">96%</div>
+            <div class="kpi-l">puntualidad</div>
+          </div>
+        </div>
+        <div class="sec-label">Cuenta</div>
+        <div class="menu-item">
+          <div class="mi-icon">👤</div>
+          <div class="mi-text">Datos personales</div>
+          <div class="mi-arrow">›</div>
+        </div>
+        <div class="menu-item">
+          <div class="mi-icon">🔔</div>
+          <div class="mi-text">Notificaciones</div>
+          <div class="mi-arrow">›</div>
+        </div>
+        <div class="menu-item">
+          <div class="mi-icon">📡</div>
+          <div class="mi-text">Ajustes GPS</div>
+          <div class="mi-arrow">›</div>
+        </div>
+        <div class="menu-item">
+          <div class="mi-icon">📊</div>
+          <div class="mi-text">Mi desempeño</div>
+          <div class="mi-arrow">›</div>
+        </div>
+        <div style="height:8px;"></div>
+        <div class="btn-danger">Cerrar sesión</div>
+        <div class="nav-bar" style="margin-top:12px;">
+          <div class="nav-i"><span class="ni">🗺</span>Rutas</div>
+          <div class="nav-i"><span class="ni">📍</span>GPS</div>
+          <div class="nav-i"><span class="ni">📊</span>Historial</div>
+          <div class="nav-i on"><span class="ni">👤</span>Perfil</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <!-- NOTIFICACIONES -->
+  <div class="screen-wrap">
+    <div class="flow-label">09 · Notificaciones</div>
+    <div class="screen-name"><span>Centro de alertas</span></div>
+    <div class="phone" style="min-height:580px;">
+      <div class="phone-notch"></div>
+      <div class="status-bar"><span>15:12</span><span>🔋</span></div>
+      <div class="inner">
+        <div class="back-header">
+          <div class="back-btn">←</div>
+          <div class="back-title">Notificaciones</div>
+        </div>
+        <!-- Unread badge -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;">3 sin leer</div>
+          <div style="font-size:10px;color:var(--accent);font-family:'Space Mono',monospace;cursor:pointer;">Marcar todo leído</div>
+        </div>
+
+        <div class="notif-item unread">
+          <div class="notif-icon">🗺</div>
+          <div>
+            <div class="notif-title">Nueva ruta asignada</div>
+            <div class="notif-body">Se te asignó "Ruta Oriente — D" para las 17:00 hrs. 8 paradas, 31 km.</div>
+            <div class="notif-time">hace 5 min</div>
+          </div>
+        </div>
+
+        <div class="notif-item unread">
+          <div class="notif-icon">⚠️</div>
+          <div>
+            <div class="notif-title">Tráfico en tu ruta</div>
+            <div class="notif-body">Congestión detectada en Av. Norte. Se estima +18 min de retraso.</div>
+            <div class="notif-time">hace 22 min</div>
+          </div>
+        </div>
+
+        <div class="notif-item unread">
+          <div class="notif-icon">✅</div>
+          <div>
+            <div class="notif-title">Ruta Sur — B confirmada</div>
+            <div class="notif-body">Tu resumen fue enviado al servidor. 22.1 km · 1h 49m registrados.</div>
+            <div class="notif-time">hace 1 hora</div>
+          </div>
+        </div>
+
+        <div style="height:6px;"></div>
+        <div class="sec-label">Anteriores</div>
+
+        <div class="notif-item">
+          <div class="notif-icon">🔔</div>
+          <div>
+            <div class="notif-title">Recordatorio de turno</div>
+            <div class="notif-body">Tu turno inicia en 30 minutos. Ruta Norte — A.</div>
+            <div class="notif-time">Ayer · 08:30</div>
+          </div>
+        </div>
+
+        <div class="notif-item">
+          <div class="notif-icon">📊</div>
+          <div>
+            <div class="notif-title">Resumen semanal listo</div>
+            <div class="notif-body">198.4 km · 12 viajes · Puntualidad 96%. ¡Buen trabajo!</div>
+            <div class="notif-time">Lun 27 Abr</div>
+          </div>
+        </div>
+
+        <div class="nav-bar" style="margin-top:14px;">
+          <div class="nav-i"><span class="ni">🗺</span>Rutas</div>
+          <div class="nav-i"><span class="ni">📍</span>GPS</div>
+          <div class="nav-i"><span class="ni">📊</span>Historial</div>
+          <div class="nav-i on"><span class="ni">👤</span>Perfil</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════ FLUJO 4: MAPA + AJUSTES GPS ══════ -->
+<h2>Flujo 04 — Mapa expandido y configuración GPS</h2>
+<div class="screens-row">
+
+  <!-- MAPA EXPANDIDO -->
+  <div class="screen-wrap">
+    <div class="flow-label">10 · Mapa completo</div>
+    <div class="screen-name"><span>Vista GPS expandida</span></div>
+    <div class="phone" style="min-height:560px;">
+      <div class="phone-notch"></div>
+      <div class="status-bar" style="position:absolute;top:0;left:0;right:0;z-index:5;background:linear-gradient(rgba(8,15,30,0.9),transparent);padding-top:10px;">
+        <span style="color:#fff;">13:14</span>
+        <span>🔋</span>
+      </div>
+      <!-- map fills entire phone -->
+      <div class="map-full" style="height:100%;margin:0;border-radius:0;">
+        <div class="mf-grid"></div>
+        <div class="mf-road"></div>
+        <div class="mf-road2"></div>
+        <div class="mf-road3"></div>
+        <div class="mf-dot"></div>
+        <div class="mf-pulse"></div>
+        <div class="mf-path"></div>
+        <div class="mf-stop s1"></div>
+        <div class="mf-stop s2"></div>
+        <div class="mf-stop s3"></div>
+        <!-- labels -->
+        <div class="mf-label" style="top:25%;left:62%;color:var(--warn);">🏪 S1</div>
+        <div class="mf-label" style="top:55%;left:66%;color:var(--accent2);">🏥 S2</div>
+        <div class="mf-label" style="top:65%;left:22%;color:var(--purple);">🏬 S3</div>
+        <div class="mf-label" style="bottom:108px;left:16px;color:var(--accent);">📡 GPS OK · 8pts/min</div>
+        <div class="mf-controls">
+          <div class="mf-btn">+</div>
+          <div class="mf-btn">−</div>
+          <div class="mf-btn" style="font-size:11px;">⊕</div>
+        </div>
+        <!-- bottom sheet -->
+        <div class="map-bottom" style="bottom:0;background:linear-gradient(transparent,rgba(8,15,30,1) 40%);padding:30px 16px 14px;">
+          <div class="rec-pill" style="background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.2);border-radius:10px;padding:7px 12px;display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <div style="width:7px;height:7px;background:var(--accent);border-radius:50%;animation:bl 1s ease-in-out infinite;flex-shrink:0;"></div>
+            <div style="font-size:10px;font-family:'Space Mono',monospace;color:var(--accent);">Grabando · Ruta Sur — B</div>
+            <div style="margin-left:auto;font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);">01:14</div>
+          </div>
+          <div style="display:flex;gap:6px;margin-bottom:10px;">
+            <div style="flex:1;background:rgba(8,15,30,0.9);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;">
+              <div style="font-size:16px;font-weight:800;font-family:'Space Mono',monospace;color:var(--accent);">8.4</div>
+              <div style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;">km</div>
+            </div>
+            <div style="flex:1;background:rgba(8,15,30,0.9);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;">
+              <div style="font-size:16px;font-weight:800;font-family:'Space Mono',monospace;color:var(--text);">42</div>
+              <div style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;">km/h</div>
+            </div>
+            <div style="flex:1;background:rgba(8,15,30,0.9);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;">
+              <div style="font-size:16px;font-weight:800;font-family:'Space Mono',monospace;color:var(--text);">3/6</div>
+              <div style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;">paradas</div>
+            </div>
+          </div>
+          <div style="background:var(--warn);color:#fff;border-radius:12px;padding:12px;text-align:center;font-weight:800;font-size:13px;">■ Finalizar recorrido</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <!-- AJUSTES GPS -->
+  <div class="screen-wrap">
+    <div class="flow-label">11 · Ajustes GPS</div>
+    <div class="screen-name"><span>Configuración de tracking</span></div>
+    <div class="phone" style="min-height:560px;">
+      <div class="phone-notch"></div>
+      <div class="status-bar"><span>15:20</span><span>🔋</span></div>
+      <div class="inner">
+        <div class="back-header">
+          <div class="back-btn">←</div>
+          <div class="back-title">Ajustes GPS</div>
+        </div>
+        <!-- Status card -->
+        <div style="background:rgba(0,229,160,0.06);border:1px solid rgba(0,229,160,0.18);border-radius:14px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+          <div style="font-size:28px;">📡</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--accent);">GPS Activo</div>
+            <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;">Precisión: ±4m · Satélites: 12</div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-group-label">TRACKING</div>
+          <div class="settings-item" style="border-radius:12px 12px 0 0;">
+            <div class="si-icon">📍</div>
+            <div class="si-text">
+              <div class="si-title">Tracking activo</div>
+              <div class="si-sub">Reportar ubicación</div>
+            </div>
+            <div class="toggle"></div>
+          </div>
+          <div class="settings-item">
+            <div class="si-icon">⏱</div>
+            <div class="si-text">
+              <div class="si-title">Frecuencia</div>
+              <div class="si-sub">Cada cuánto reportar</div>
+            </div>
+            <div class="si-select">8s</div>
+          </div>
+          <div class="settings-item" style="border-radius:0 0 12px 12px;">
+            <div class="si-icon">🔋</div>
+            <div class="si-text">
+              <div class="si-title">Modo ahorro</div>
+              <div class="si-sub">Reduce frecuencia en parada</div>
+            </div>
+            <div class="toggle"></div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-group-label">FONDO</div>
+          <div class="settings-item" style="border-radius:12px 12px 0 0;">
+            <div class="si-icon">🔄</div>
+            <div class="si-text">
+              <div class="si-title">GPS en segundo plano</div>
+              <div class="si-sub">Funciona con pantalla apagada</div>
+            </div>
+            <div class="toggle"></div>
+          </div>
+          <div class="settings-item" style="border-radius:0 0 12px 12px;">
+            <div class="si-icon">💾</div>
+            <div class="si-text">
+              <div class="si-title">Guardar offline</div>
+              <div class="si-sub">Cola local sin conexión</div>
+            </div>
+            <div class="toggle"></div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-group-label">PRECISIÓN</div>
+          <div class="settings-item" style="border-radius:12px;">
+            <div class="si-icon">🎯</div>
+            <div class="si-text">
+              <div class="si-title">Nivel de precisión</div>
+              <div class="si-sub">Alta · GPS + red</div>
+            </div>
+            <div class="si-select">Alta</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════ FLUJO 5: OFFLINE + ESTADÍSTICAS ══════ -->
+<h2>Flujo 05 — Sin conexión y estadísticas de desempeño</h2>
+<div class="screens-row">
+
+  <!-- OFFLINE -->
+  <div class="screen-wrap">
+    <div class="flow-label">12 · Modo offline</div>
+    <div class="screen-name"><span>Sin conexión — cola local</span></div>
+    <div class="phone" style="min-height:560px;">
+      <div class="phone-notch"></div>
+      <div class="status-bar" style="background:rgba(255,107,53,0.05);">
+        <span>13:45</span>
+        <span style="color:var(--warn);">📵 Sin red</span>
+      </div>
+      <div class="inner">
+        <div class="back-header" style="padding-bottom:6px;">
+          <div class="back-title">Estado de conexión</div>
+        </div>
+
+        <div class="offline-banner">
+          <div class="ob-dot"></div>
+          <div class="ob-text">Sin conexión · datos guardados localmente</div>
+        </div>
+
+        <div class="offline-queue">
+          <div class="oq-title">Cola de sincronización</div>
+          <div class="oq-row">
+            <div class="oq-label">Puntos GPS pendientes</div>
+            <div class="oq-val warn">247</div>
+          </div>
+          <div class="oq-row">
+            <div class="oq-label">Tiempo offline</div>
+            <div class="oq-val">18 min</div>
+          </div>
+          <div class="oq-row">
+            <div class="oq-label">Datos en cola</div>
+            <div class="oq-val">~48 KB</div>
+          </div>
+          <!-- mini progress bar -->
+          <div style="margin-top:10px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <div style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;">Almacenamiento local</div>
+              <div style="font-size:9px;color:var(--accent);font-family:'Space Mono',monospace;">12%</div>
+            </div>
+            <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
+              <div style="height:100%;width:12%;background:var(--accent);border-radius:3px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec-label">Pendientes de envío</div>
+
+        <div class="sync-item">
+          <div class="sync-i-icon">📍</div>
+          <div class="sync-i-text">Puntos de ubicación · Ruta Sur B</div>
+          <div class="sync-i-val">247 pts</div>
+        </div>
+        <div class="sync-item">
+          <div class="sync-i-icon">🏁</div>
+          <div class="sync-i-text">Evento fin de recorrido</div>
+          <div class="sync-i-val">1</div>
+        </div>
+        <div class="sync-item">
+          <div class="sync-i-icon">📋</div>
+          <div class="sync-i-text">Resumen de viaje</div>
+          <div class="sync-i-val">1</div>
+        </div>
+
+        <div style="margin-top:14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:16px;">ℹ️</span>
+          <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;line-height:1.6;">El GPS sigue activo. Todo se sincroniza automáticamente al recuperar señal.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <!-- ESTADÍSTICAS -->
+  <div class="screen-wrap">
+    <div class="flow-label">13 · Desempeño</div>
+    <div class="screen-name"><span>Estadísticas del conductor</span></div>
+    <div class="phone" style="min-height:580px;">
+      <div class="phone-notch"></div>
+      <div class="status-bar"><span>15:30</span><span>🔋</span></div>
+      <div class="inner">
+        <div class="back-header">
+          <div class="back-btn">←</div>
+          <div class="back-title">Mi desempeño</div>
+        </div>
+
+        <div class="period-tabs">
+          <div class="ptab">Día</div>
+          <div class="ptab on">Semana</div>
+          <div class="ptab">Mes</div>
+        </div>
+
+        <div class="big-stat">
+          <div class="bs-val">198<span class="bs-unit">km</span></div>
+          <div class="bs-lab">Distancia total esta semana</div>
+        </div>
+
+        <!-- Bar chart -->
+        <div class="bar-chart">
+          <div class="bars-wrap">
+            <div class="bar-col"><div class="bar" style="height:40px;"></div><div class="bar-lbl">L</div></div>
+            <div class="bar-col"><div class="bar" style="height:55px;"></div><div class="bar-lbl">M</div></div>
+            <div class="bar-col"><div class="bar" style="height:35px;"></div><div class="bar-lbl">Mi</div></div>
+            <div class="bar-col"><div class="bar" style="height:65px;"></div><div class="bar-lbl">J</div></div>
+            <div class="bar hi" style="height:80px;border-radius:4px 4px 0 0;"></div>
+            <div class="bar-col">
+              <div style="height:80px;"></div><!-- spacer for hi bar -->
+              <div class="bar-lbl" style="color:var(--accent);">V</div>
+            </div>
+            <div class="bar-col"><div class="bar" style="height:20px;"></div><div class="bar-lbl">S</div></div>
+          </div>
+        </div>
+
+        <div class="stat-row2">
+          <div class="sr-box">
+            <div class="sr-v" style="color:var(--accent);">12</div>
+            <div class="sr-l">Viajes</div>
+          </div>
+          <div class="sr-box">
+            <div class="sr-v">21.3h</div>
+            <div class="sr-l">Tiempo total</div>
+          </div>
+          <div class="sr-box">
+            <div class="sr-v" style="color:var(--green);">96%</div>
+            <div class="sr-l">Puntualidad</div>
+          </div>
+        </div>
+
+        <div class="sec-label">Indicadores</div>
+
+        <div class="perf-item">
+          <div class="pi-icon">⚡</div>
+          <div class="pi-text">
+            <div class="pi-title">Velocidad promedio</div>
+            <div class="pi-sub">42 km/h · óptimo</div>
+          </div>
+          <div class="pi-bar-wrap">
+            <div class="pi-bar"><div class="pi-fill" style="width:72%;"></div></div>
+            <div class="pi-pct">72%</div>
+          </div>
+        </div>
+        <div class="perf-item">
+          <div class="pi-icon">🎯</div>
+          <div class="pi-text">
+            <div class="pi-title">Puntualidad</div>
+            <div class="pi-sub">11.5 de 12 a tiempo</div>
+          </div>
+          <div class="pi-bar-wrap">
+            <div class="pi-bar"><div class="pi-fill" style="width:96%;"></div></div>
+            <div class="pi-pct">96%</div>
+          </div>
+        </div>
+        <div class="perf-item">
+          <div class="pi-icon">📍</div>
+          <div class="pi-text">
+            <div class="pi-title">Paradas completadas</div>
+            <div class="pi-sub">57 de 60 totales</div>
+          </div>
+          <div class="pi-bar-wrap">
+            <div class="pi-bar"><div class="pi-fill" style="width:95%;"></div></div>
+            <div class="pi-pct">95%</div>
+          </div>
+        </div>
+
+        <div class="nav-bar" style="margin-top:10px;">
+          <div class="nav-i"><span class="ni">🗺</span>Rutas</div>
+          <div class="nav-i"><span class="ni">📍</span>GPS</div>
+          <div class="nav-i on"><span class="ni">📊</span>Historial</div>
+          <div class="nav-i"><span class="ni">👤</span>Perfil</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</div>
+</body>
+</html>

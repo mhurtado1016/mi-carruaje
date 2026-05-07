@@ -1,0 +1,29 @@
+# Secrets
+backend/.env
+**/*.env
+
+# Node
+backend/node_modules/
+
+# Flutter build
+routetrack/build/
+routetrack/.dart_tool/
+routetrack/.flutter-plugins
+routetrack/.flutter-plugins-dependencies
+routetrack/.packages
+routetrack/pubspec.lock
+
+# Android
+routetrack/android/.gradle/
+routetrack/android/local.properties
+routetrack/android/key.properties
+*.apk
+*.aab
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Claude internal
+.claude/
