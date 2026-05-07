@@ -5,25 +5,41 @@ backend/.env
 # Node
 backend/node_modules/
 
-# Flutter build
+# Flutter / Android build
 routetrack/build/
 routetrack/.dart_tool/
 routetrack/.flutter-plugins
 routetrack/.flutter-plugins-dependencies
 routetrack/.packages
 routetrack/pubspec.lock
-
-# Android
-routetrack/android/.gradle/
-routetrack/android/local.properties
-routetrack/android/key.properties
+.gradle/
+build/
 *.apk
 *.aab
+output-metadata.json
+
+# Android local config
+local.properties
+android/app/google-services.json
+*.jks
+*.keystore
+*.hprof
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+misc.xml
+deploymentTargetDropDown.xml
+render.experimental.xml
+captures/
+.externalNativeBuild/
+.cxx/
 
 # IDE
-.idea/
 .vscode/
-*.iml
+
+# Logs
+*.log
 
 # Claude internal
 .claude/
